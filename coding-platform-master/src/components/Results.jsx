@@ -355,337 +355,360 @@ const Results = () => {
   };
 
   const getGrade = (percentage) => {
-  if (percentage >= 90) return { grade: "A", color: "text-green-600" };
-  if (percentage >= 70) return { grade: "B", color: "text-blue-600" };
-  if (percentage >= 50) return { grade: "C", color: "text-yellow-600" };
-  if (percentage >= 30) return { grade: "D", color: "text-orange-600" };
-  return { grade: "F", color: "text-red-600" };
-};
-// Toggle between current result and history
-const handleViewModeChange = (mode) => {
-  if (mode === 'current') {
-    // If switching to "Current" view, show the latest result only if it exists
-    const latestResult = allResults[0]; // Latest result is the first in the array
-    if (latestResult) {
-      setCurrentResults(latestResult);
-    } else {
-      // If no results exist, stay in history view
-      setViewMode('history');
-      return;
+    if (percentage >= 90) return { grade: "A", color: "text-green-600" };
+    if (percentage >= 70) return { grade: "B", color: "text-blue-600" };
+    if (percentage >= 50) return { grade: "C", color: "text-yellow-600" };
+    if (percentage >= 30) return { grade: "D", color: "text-orange-600" };
+    return { grade: "F", color: "text-red-600" };
+  };
+
+  // Toggle between current result and history
+  const handleViewModeChange = (mode) => {
+    if (mode === 'current') {
+      // If switching to "Current" view, show the latest result only if it exists
+      const latestResult = allResults[0]; // Latest result is the first in the array
+      if (latestResult) {
+        setCurrentResults(latestResult);
+      } else {
+        // If no results exist, stay in history view
+        setViewMode('history');
+        return;
+      }
     }
-  }
-  setViewMode(mode);
-};
+    setViewMode(mode);
+  };
 
-// Clear current results and exam data
-const clearCurrentExam = () => {
-  sessionStorage.removeItem("examResults");
-  sessionStorage.removeItem("examEndReason");
-  sessionStorage.removeItem("codingQuestions");
-};
+  // Clear current results and exam data
+  const clearCurrentExam = () => {
+    sessionStorage.removeItem("examResults");
+    sessionStorage.removeItem("examEndReason");
+    sessionStorage.removeItem("codingQuestions");
+  };
 
-// Delete a specific result from history
-const deleteResult = (timestamp) => {
-  const updatedResults = allResults.filter(result => result.timestamp !== timestamp);
-  setAllResults(updatedResults);
-  localStorage.setItem("examHistoryResults", JSON.stringify(updatedResults));
-  
-  // If we're deleting the current expanded result, close it
-  if (expandedResult === timestamp) {
-    setExpandedResult(null);
-  }
-};
-
-// Clear all history
-const clearAllHistory = () => {
-  if (window.confirm("Are you sure you want to delete all exam history? This cannot be undone.")) {
-    localStorage.removeItem("examHistoryResults");
-    setAllResults([]);
-    setExpandedResult(null);
+  // Delete a specific result from history
+  const deleteResult = (timestamp) => {
+    const updatedResults = allResults.filter(result => result.timestamp !== timestamp);
+    setAllResults(updatedResults);
+    localStorage.setItem("examHistoryResults", JSON.stringify(updatedResults));
     
-    // If we're in history view with no results, go back to home
-    if (viewMode === 'history' && !currentResults) {
-      navigate("/");
+    // If we're deleting the current expanded result, close it
+    if (expandedResult === timestamp) {
+      setExpandedResult(null);
     }
-  }
-};
+  };
 
-if (!currentResults && viewMode === 'current' && allResults.length === 0) {
-  return (
-    <div className="min-h-screen bg-gray-100 flex items-center justify-center">
-      <div className="text-xl font-semibold text-gray-600">
-        No results available. Please take an exam first.
-      </div>
-    </div>
-  );
-}
+  // Clear all history
+  const clearAllHistory = () => {
+    if (window.confirm("Are you sure you want to delete all exam history? This cannot be undone.")) {
+      localStorage.removeItem("examHistoryResults");
+      setAllResults([]);
+      setExpandedResult(null);
+      
+      // If we're in history view with no results, go back to home
+      if (viewMode === 'history' && !currentResults) {
+        navigate("/");
+      }
+    }
+  };
 
-return (
-  <div className="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
-  <div className="max-w-4xl mx-auto">
-    <div className="bg-white shadow-lg rounded-lg overflow-hidden">
-      <div className="px-6 py-8">
-        <h1 className="text-3xl font-bold text-center mb-8">
-          {viewMode === 'current' ? `Exam Results for ${name}` : 'Exam History'}
-        </h1>
-
-        {/* Conditionally render the toggle button */}
-        {name !== "Unknown" && (
-          <div className="flex justify-center mb-8">
-            <div className="inline-flex rounded-md shadow-sm" role="group">
-              <button
-                type="button"
-                onClick={() => handleViewModeChange('current')}
-                disabled={!currentResults}
-                className={`px-4 py-2 text-sm font-medium rounded-l-lg ${
-                  viewMode === 'current'
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-white text-gray-700 hover:bg-gray-50'
-                } border border-gray-200`}
-              >
-                Current Result
-              </button>
-              <button
-                type="button"
-                onClick={() => handleViewModeChange('history')}
-                className={`px-4 py-2 text-sm font-medium rounded-r-lg ${
-                  viewMode === 'history'
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-white text-gray-700 hover:bg-gray-50'
-                } border border-gray-200`}
-              >
-                History
-              </button>
-            </div>
-          </div>
-        )}
-
-        {viewMode === 'current' && currentResults ? (
-          <div className="space-y-8">
-            {/* Current Exam Result content */}
-            {/* Exam End Reason */}
-            {reason && (
-              <div className="mb-6 p-4 bg-gray-50 rounded-lg">
-                <p className="text-gray-700">
-                  <span className="font-medium">Status:</span> {reason}
-                </p>
-              </div>
-            )}
-
-            {/* Overall Score */}
-            <div className="text-center p-6 bg-gray-50 rounded-lg">
-              <h2 className="text-2xl font-semibold mb-4">
-                Overall Performance
-              </h2>
-              <div
-                className={`text-4xl font-bold mb-2 ${
-                  getGrade(calculateTotalPercentage(currentResults)).color
-                }`}
-              >
-                {calculateTotalPercentage(currentResults)}%
-              </div>
-              <div className="text-xl mb-4">
-                Grade: {getGrade(calculateTotalPercentage(currentResults)).grade}
-              </div>
-              <PerformanceBadge performance={calculateTotalPercentage(currentResults)} />
-            </div>
-
-            {/* Section Scores */}
-            <div className="grid md:grid-cols-2 gap-6">
-              {/* MCQ Section */}
-              <div className="border rounded-lg p-6">
-                <h3 className="text-xl font-semibold mb-4">
-                  Multiple Choice Questions
-                </h3>
-                <div className="space-y-4">
-                  <div className="text-center p-4 bg-gray-50 rounded">
-                    <div className="text-sm text-gray-600 mb-1">Score</div>
-                    <div className="text-2xl font-bold">
-                      {currentResults.mcq.score}/{currentResults.mcq.total}
-                    </div>
-                  </div>
-                  <div className="text-center p-4 bg-gray-50 rounded">
-                    <div className="text-sm text-gray-600 mb-1">
-                      Percentage
-                    </div>
-                    <div
-                      className={`text-2xl font-bold ${
-                        getGrade(calculateMCQPercentage(currentResults)).color
-                      }`}
-                    >
-                      {calculateMCQPercentage(currentResults)}%
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Coding Section */}
-              <div className="border rounded-lg p-6">
-                <h3 className="text-xl font-semibold mb-4">
-                  Coding Questions
-                </h3>
-                <div className="space-y-4">
-                  <div className="text-center p-4 bg-gray-50 rounded">
-                    <div className="text-sm text-gray-600 mb-1">
-                      Test Cases Passed
-                    </div>
-                    <div className="text-2xl font-bold">
-                      {currentResults.coding.score}/{currentResults.coding.total}
-                    </div>
-                  </div>
-                  <div className="text-center p-4 bg-gray-50 rounded">
-                    <div className="text-sm text-gray-600 mb-1">
-                      Percentage
-                    </div>
-                    <div
-                      className={`text-2xl font-bold ${
-                        getGrade(calculateCodingPercentage(currentResults)).color
-                      }`}
-                    >
-                      {calculateCodingPercentage(currentResults)}%
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Coding Solutions Review */}
-            <div className="border-t pt-8">
-              <h3 className="text-2xl font-semibold mb-6">
-                Code Review & Optimization
-              </h3>
-
-              {currentResults?.coding?.answers &&
-                Object.entries(currentResults.coding.answers).map(
-                  ([index, submission]) => {
-                    const question = currentResults.questions[index];
-                    return (
-                      <div key={index} className="mb-8 p-6 border rounded-lg">
-                        <h4 className="text-xl font-semibold mb-4">
-                          {question.title}
-                        </h4>
-
-                        <div className="grid grid-cols-2 gap-4 mb-4">
-                          <div className="p-4 bg-gray-50 rounded">
-                            <div className="text-sm text-gray-600">
-                              Tests Passed
-                            </div>
-                            <div className="text-xl font-bold">
-                              {submission.testsPassed}/{submission.totalTests}
-                            </div>
-                          </div>
-
-                          {/* Optimization Status */}
-                          <div
-                            className={`p-4 rounded ${
-                              submission.optimization?.optimal
-                                ? "bg-green-50"
-                                : "bg-yellow-50"
-                            }`}
-                          >
-                            <div className="text-sm text-gray-600">
-                              Solution Efficiency
-                            </div>
-                            <div className="text-sm mt-1">
-                              {submission.optimization?.optimal
-                                ? "✓ Optimal Solution"
-                                : `⚠ ${submission.optimization?.reason}`}
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Show optimal solution if the submitted solution isn't optimal */}
-                        {!submission.optimization?.optimal &&
-                          question.optimalSolution && (
-                            <OptimalSolutionDisplay
-                              question={question}
-                              submittedCode={submission.code}
-                              language={submission.language}
-                            />
-                          )}
-                      </div>
-                    );
-                  }
-                )}
-            </div>
-          </div>
-        ) : (
-          <div className="space-y-8">
-            {/* History View */}
-            {allResults.length > 0 ? (
-              <div>
-                <div className="flex justify-between items-center mb-6">
-                  <h2 className="text-2xl font-semibold">Result History</h2>
-                  <button
-                    onClick={clearAllHistory}
-                    className="px-4 py-2 text-sm font-medium text-red-700 bg-red-100 rounded hover:bg-red-200 transition-colors"
-                  >
-                    Clear All History
-                  </button>
-                </div>
-
-                {allResults.map((result, index) => (
-                  <div key={index} className="relative">
-                    <ResultHistoryItem
-                      result={result}
-                      isExpanded={expandedResult === result.timestamp}
-                      toggleExpand={() => toggleResultExpand(result.timestamp)}
-                    />
-                    {/* Delete button for this result */}
-                    <button
-                      className="absolute top-4 right-4 text-gray-400 hover:text-red-600"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        deleteResult(result.timestamp);
-                      }}
-                      title="Delete this result"
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
-                      </svg>
-                    </button>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center p-10 bg-gray-50 rounded-lg">
-                <div className="text-xl text-gray-500">
-                  No exam history available.
-                </div>
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Action Buttons */}
-        <div className="mt-12 flex justify-center space-x-4">
+  if (name !== "Unknown") {
+    return (
+      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-4xl font-bold text-blue-600 mb-4">
+            Thank You for Taking the Test, {name}!
+          </h1>
+          <p className="text-xl text-gray-700 mb-8">
+            We appreciate your participation. Your results will be reviewed and you will be notified shortly.
+          </p>
           <button
             onClick={() => navigate("/")}
             className="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
           >
             Return to Home
           </button>
-          {viewMode === 'current' && currentResults && (
-            <>
+        </div>
+      </div>
+    );
+  }
+
+  if (!currentResults && viewMode === 'current' && allResults.length === 0) {
+    return (
+      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+        <div className="text-xl font-semibold text-gray-600">
+          No results available. Please take an exam first.
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-4xl mx-auto">
+        <div className="bg-white shadow-lg rounded-lg overflow-hidden">
+          <div className="px-6 py-8">
+            <h1 className="text-3xl font-bold text-center mb-8">
+              {viewMode === 'current' ? `Exam Results for ${name}` : 'Exam History'}
+            </h1>
+
+            {/* Conditionally render the toggle button */}
+            {name !== "Unknown" && (
+              <div className="flex justify-center mb-8">
+                <div className="inline-flex rounded-md shadow-sm" role="group">
+                  <button
+                    type="button"
+                    onClick={() => handleViewModeChange('current')}
+                    disabled={!currentResults}
+                    className={`px-4 py-2 text-sm font-medium rounded-l-lg ${
+                      viewMode === 'current'
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-white text-gray-700 hover:bg-gray-50'
+                    } border border-gray-200`}
+                  >
+                    Current Result
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleViewModeChange('history')}
+                    className={`px-4 py-2 text-sm font-medium rounded-r-lg ${
+                      viewMode === 'history'
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-white text-gray-700 hover:bg-gray-50'
+                    } border border-gray-200`}
+                  >
+                    History
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {viewMode === 'current' && currentResults ? (
+              <div className="space-y-8">
+                {/* Current Exam Result content */}
+                {/* Exam End Reason */}
+                {reason && (
+                  <div className="mb-6 p-4 bg-gray-50 rounded-lg">
+                    <p className="text-gray-700">
+                      <span className="font-medium">Status:</span> {reason}
+                    </p>
+                  </div>
+                )}
+
+                {/* Overall Score */}
+                <div className="text-center p-6 bg-gray-50 rounded-lg">
+                  <h2 className="text-2xl font-semibold mb-4">
+                    Overall Performance
+                  </h2>
+                  <div
+                    className={`text-4xl font-bold mb-2 ${
+                      getGrade(calculateTotalPercentage(currentResults)).color
+                    }`}
+                  >
+                    {calculateTotalPercentage(currentResults)}%
+                  </div>
+                  <div className="text-xl mb-4">
+                    Grade: {getGrade(calculateTotalPercentage(currentResults)).grade}
+                  </div>
+                  <PerformanceBadge performance={calculateTotalPercentage(currentResults)} />
+                </div>
+
+                {/* Section Scores */}
+                <div className="grid md:grid-cols-2 gap-6">
+                  {/* MCQ Section */}
+                  <div className="border rounded-lg p-6">
+                    <h3 className="text-xl font-semibold mb-4">
+                      Multiple Choice Questions
+                    </h3>
+                    <div className="space-y-4">
+                      <div className="text-center p-4 bg-gray-50 rounded">
+                        <div className="text-sm text-gray-600 mb-1">Score</div>
+                        <div className="text-2xl font-bold">
+                          {currentResults.mcq.score}/{currentResults.mcq.total}
+                        </div>
+                      </div>
+                      <div className="text-center p-4 bg-gray-50 rounded">
+                        <div className="text-sm text-gray-600 mb-1">
+                          Percentage
+                        </div>
+                        <div
+                          className={`text-2xl font-bold ${
+                            getGrade(calculateMCQPercentage(currentResults)).color
+                          }`}
+                        >
+                          {calculateMCQPercentage(currentResults)}%
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Coding Section */}
+                  <div className="border rounded-lg p-6">
+                    <h3 className="text-xl font-semibold mb-4">
+                      Coding Questions
+                    </h3>
+                    <div className="space-y-4">
+                      <div className="text-center p-4 bg-gray-50 rounded">
+                        <div className="text-sm text-gray-600 mb-1">
+                          Test Cases Passed
+                        </div>
+                        <div className="text-2xl font-bold">
+                          {currentResults.coding.score}/{currentResults.coding.total}
+                        </div>
+                      </div>
+                      <div className="text-center p-4 bg-gray-50 rounded">
+                        <div className="text-sm text-gray-600 mb-1">
+                          Percentage
+                        </div>
+                        <div
+                          className={`text-2xl font-bold ${
+                            getGrade(calculateCodingPercentage(currentResults)).color
+                          }`}
+                        >
+                          {calculateCodingPercentage(currentResults)}%
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Coding Solutions Review */}
+                <div className="border-t pt-8">
+                  <h3 className="text-2xl font-semibold mb-6">
+                    Code Review & Optimization
+                  </h3>
+
+                  {currentResults?.coding?.answers &&
+                    Object.entries(currentResults.coding.answers).map(
+                      ([index, submission]) => {
+                        const question = currentResults.questions[index];
+                        return (
+                          <div key={index} className="mb-8 p-6 border rounded-lg">
+                            <h4 className="text-xl font-semibold mb-4">
+                              {question.title}
+                            </h4>
+
+                            <div className="grid grid-cols-2 gap-4 mb-4">
+                              <div className="p-4 bg-gray-50 rounded">
+                                <div className="text-sm text-gray-600">
+                                  Tests Passed
+                                </div>
+                                <div className="text-xl font-bold">
+                                  {submission.testsPassed}/{submission.totalTests}
+                                </div>
+                              </div>
+
+                              {/* Optimization Status */}
+                              <div
+                                className={`p-4 rounded ${
+                                  submission.optimization?.optimal
+                                    ? "bg-green-50"
+                                    : "bg-yellow-50"
+                                }`}
+                              >
+                                <div className="text-sm text-gray-600">
+                                  Solution Efficiency
+                                </div>
+                                <div className="text-sm mt-1">
+                                  {submission.optimization?.optimal
+                                    ? "✓ Optimal Solution"
+                                    : `⚠ ${submission.optimization?.reason}`}
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Show optimal solution if the submitted solution isn't optimal */}
+                            {!submission.optimization?.optimal &&
+                              question.optimalSolution && (
+                                <OptimalSolutionDisplay
+                                  question={question}
+                                  submittedCode={submission.code}
+                                  language={submission.language}
+                                />
+                              )}
+                          </div>
+                        );
+                      }
+                    )}
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-8">
+                {/* History View */}
+                {allResults.length > 0 ? (
+                  <div>
+                    <div className="flex justify-between items-center mb-6">
+                      <h2 className="text-2xl font-semibold">Result History</h2>
+                      <button
+                        onClick={clearAllHistory}
+                        className="px-4 py-2 text-sm font-medium text-red-700 bg-red-100 rounded hover:bg-red-200 transition-colors"
+                      >
+                        Clear All History
+                      </button>
+                    </div>
+
+                    {allResults.map((result, index) => (
+                      <div key={index} className="relative">
+                        <ResultHistoryItem
+                          result={result}
+                          isExpanded={expandedResult === result.timestamp}
+                          toggleExpand={() => toggleResultExpand(result.timestamp)}
+                        />
+                        {/* Delete button for this result */}
+                        <button
+                          className="absolute top-4 right-4 text-gray-400 hover:text-red-600"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            deleteResult(result.timestamp);
+                          }}
+                          title="Delete this result"
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
+                          </svg>
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center p-10 bg-gray-50 rounded-lg">
+                    <div className="text-xl text-gray-500">
+                      No exam history available.
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Action Buttons */}
+            <div className="mt-12 flex justify-center space-x-4">
               <button
-                onClick={() => window.print()}
-                className="px-6 py-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors"
+                onClick={() => navigate("/")}
+                className="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
               >
-                Print Results
+                Return to Home
               </button>
-              <button
-                onClick={clearCurrentExam}
-                className="px-6 py-3 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
-              >
-                Start New Exam
-              </button>
-            </>
-          )}
+              {viewMode === 'current' && currentResults && (
+                <>
+                  <button
+                    onClick={() => window.print()}
+                    className="px-6 py-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors"
+                  >
+                    Print Results
+                  </button>
+                  <button
+                    onClick={clearCurrentExam}
+                    className="px-6 py-3 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+                  >
+                    Start New Exam
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
         </div>
       </div>
     </div>
-  </div>
-</div>
-);
+  );
 };
+
 export default Results;
