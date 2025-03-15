@@ -389,6 +389,7 @@ const Exam = () => {
     person: 0,
     noPerson: 0,
     multiplePeople: 0,
+    sound: 0, // Add this line
   });
   const [alerts, setAlerts] = useState([]);
   const alertIdCounter = useRef(0);
@@ -420,13 +421,21 @@ const Exam = () => {
       if (event.key === "n" || event.key === "N") {
         nKeyRef.current = true;
         setIsNPressed(true);
-      } else if (event.key === "k" || (event.key === "K" && !isInitialCheck)) {
-        stopProctoring();
-        handleExamEnd("Test terminated: Due to malpractice");
-        addAlert("🛑 Exam terminated due to malpractice", "error");
+      } else if (event.key === "k" || event.key === "K") {
+        if (!isInitialCheck) {
+          setWarnings((prev) => {
+            const newCount = prev.sound + 1;
+            if (newCount === 1) {
+              addAlert("⚠️ Warning: Suspicious sound detected!", "warning");
+            } else if (newCount >= 3) {
+              handleExamEnd("Test terminated: Suspicious background noise detected");
+            }
+            return { ...prev, sound: newCount };
+          });
+        }
       }
     };
-
+  
     window.addEventListener("keydown", handleKeyPress);
     return () => window.removeEventListener("keydown", handleKeyPress);
   }, [isInitialCheck]);
