@@ -15,6 +15,7 @@ import Landing from "./components/Landing";
 import Login from "./components/Login";
 import Dashboard from "./components/Dashboard";
 import SetQuestions from "./components/SetQuestions";
+import Candidates from "./components/Candidates";
 function App() {
   const router = createBrowserRouter([
     {
@@ -32,6 +33,10 @@ function App() {
         {
           path: "/login",
           element: <Login />,
+        },
+        {
+          path: "/candidates",
+          element: <Candidates />,
         },
         {
           path: "/dashboard",
