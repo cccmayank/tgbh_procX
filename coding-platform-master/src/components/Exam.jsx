@@ -412,22 +412,7 @@ const Exam = () => {
       });
   }, []);
 
-  // Remove the API fetch effect since we're now importing the data directly
-  // useEffect(() => {
-  //   const fetchData = async () => {
-  //     const api_key = process.env.REACT_APP_Api_KEY;
-  //     const api = `https://quizapi.io/api/v1/questions?apiKey=${api_key}&limit=10`;
-  //     try {
-  //       const res = await fetch(api);
-  //       const data = await res.json();
-  //       setData(data);
-  //     } catch (error) {
-  //       console.log(error);
-  //     }
-  //   };
-  //   fetchData();
-  // }, []);
-
+ 
   useEffect(() => {
     const handleKeyPress = (event) => {
       if (event.key === "n" || event.key === "N") {
@@ -505,7 +490,7 @@ const Exam = () => {
 
   const monitorTabSwitch = () => {
     const handleVisibilityChange = () => {
-      if (document.visibilityState === "hidden" && !isInitialCheck) {
+      if (document.visibilityState === "hidden") {
         clearTimeout(visibilityTimeout.current);
         visibilityTimeout.current = setTimeout(() => {
           setWarnings((prev) => {
@@ -523,7 +508,7 @@ const Exam = () => {
     };
 
     const handleWindowBlur = () => {
-      if (!isInitialCheck) {
+      if (isInitialCheck) {
         clearTimeout(blurTimeout.current);
         blurTimeout.current = setTimeout(() => {
           setWarnings((prev) => {
