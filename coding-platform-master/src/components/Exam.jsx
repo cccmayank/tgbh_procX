@@ -405,6 +405,22 @@ const Exam = () => {
   // Using imported questions data directly
   const [data, setData] = useState([]);
   useEffect(() => {
+    // Right-click disable karne ke liye handler
+    const handleContextMenu = (event) => {
+      event.preventDefault(); // Right-click prevent karein
+      addAlert("⚠️ Right-click is disabled during the exam!", "warning"); // Warning show karein
+    };
+  
+    // Event listener add karein
+    window.addEventListener("contextmenu", handleContextMenu);
+  
+    // Cleanup function
+    return () => {
+      window.removeEventListener("contextmenu", handleContextMenu);
+    };
+  }, []);
+  
+  useEffect(() => {
     fetch("/data/questions.json")
       .then((response) => response.json())
       .then((data) => {

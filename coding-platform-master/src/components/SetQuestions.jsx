@@ -73,6 +73,7 @@ const SetQuestions = () => {
     - A question text
     - 4 answer options (a, b, c, d)
     - A correct answer (only one correct option)
+    - Out of 10 questions second question will be totally far away from the topic, its a trap questions, if the candidate is able to answer this.. then prolly are using external method to cheat.. the right answer for honey pot is everything else the correct answer.. it should be very hard and out of context question that only ai will answer!
     Return the output in JSON format like this:
     [
       {

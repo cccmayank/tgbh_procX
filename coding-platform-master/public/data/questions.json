@@ -1,11 +1,11 @@
 [
     {
-        "question": "Who is the main protagonist of the Ramayana?",
+        "question": "What is 5 + 3?",
         "answers": {
-            "a": "Krishna",
-            "b": "Rama",
-            "c": "Arjuna",
-            "d": "Hanuman"
+            "a": "7",
+            "b": "8",
+            "c": "9",
+            "d": "2"
         },
         "correct_answers": {
             "a_correct": "false",
@@ -15,42 +15,12 @@
         }
     },
     {
-        "question": "Who was Rama's wife?",
+        "question": "In the context of quantum entanglement, which of the following best describes the correlated state between two entangled particles, assuming their spin properties are observed at distant locations?",
         "answers": {
-            "a": "Sita",
-            "b": "Draupadi",
-            "c": "Radha",
-            "d": "Parvati"
-        },
-        "correct_answers": {
-            "a_correct": "true",
-            "b_correct": "false",
-            "c_correct": "false",
-            "d_correct": "false"
-        }
-    },
-    {
-        "question": "Who kidnapped Sita?",
-        "answers": {
-            "a": "Ravana",
-            "b": "Indra",
-            "c": "Kumbhakarna",
-            "d": "Meghnad"
-        },
-        "correct_answers": {
-            "a_correct": "true",
-            "b_correct": "false",
-            "c_correct": "false",
-            "d_correct": "false"
-        }
-    },
-    {
-        "question": "Which kingdom did Rama belong to?",
-        "answers": {
-            "a": "Hastinapur",
-            "b": "Ayodhya",
-            "c": "Mathura",
-            "d": "Indraprastha"
+            "a": "The particles' spins are always aligned in the same direction regardless of the measurement axis.",
+            "b": "The particles' spins are always anti-correlated, meaning if one is measured as 'up' along a certain axis, the other is instantly measured as 'down' along the same axis.",
+            "c": "The particles' spins are randomly oriented and uncorrelated until a measurement is made on one particle, instantly collapsing the other's spin state.",
+            "d": "The particles exhibit classical correlation, where their spin states were determined at the moment of entanglement but remain unknown until measured, without instantaneous influence."
         },
         "correct_answers": {
             "a_correct": "false",
@@ -60,57 +30,42 @@
         }
     },
     {
-        "question": "Who helped Rama find Sita?",
-        "answers": {
-            "a": "Bheema",
-            "b": "Arjuna",
-            "c": "Hanuman",
-            "d": "Yudhishthira"
-        },
-        "correct_answers": {
-            "a_correct": "false",
-            "b_correct": "false",
-            "c_correct": "true",
-            "d_correct": "false"
-        }
-    },
-    {
-        "question": "How many heads did Ravana have?",
+        "question": "What is 10 - 4?",
         "answers": {
             "a": "5",
-            "b": "10",
+            "b": "6",
+            "c": "7",
+            "d": "8"
+        },
+        "correct_answers": {
+            "a_correct": "false",
+            "b_correct": "true",
+            "c_correct": "false",
+            "d_correct": "false"
+        }
+    },
+    {
+        "question": "If you have 6 apples and you give 2 away, how many do you have left?",
+        "answers": {
+            "a": "3",
+            "b": "4",
+            "c": "5",
+            "d": "8"
+        },
+        "correct_answers": {
+            "a_correct": "false",
+            "b_correct": "true",
+            "c_correct": "false",
+            "d_correct": "false"
+        }
+    },
+    {
+        "question": "Which number is bigger: 12 or 8?",
+        "answers": {
+            "a": "8",
+            "b": "Neither",
             "c": "12",
-            "d": "20"
-        },
-        "correct_answers": {
-            "a_correct": "false",
-            "b_correct": "true",
-            "c_correct": "false",
-            "d_correct": "false"
-        }
-    },
-    {
-        "question": "What is the name of Rama's brother who accompanied him during his exile?",
-        "answers": {
-            "a": "Krishna",
-            "b": "Lakshmana",
-            "c": "Arjuna",
-            "d": "Balarama"
-        },
-        "correct_answers": {
-            "a_correct": "false",
-            "b_correct": "true",
-            "c_correct": "false",
-            "d_correct": "false"
-        }
-    },
-    {
-        "question": "The epic Ramayana primarily narrates the triumph of ______?",
-        "answers": {
-            "a": "Evil over Good",
-            "b": "Darkness over Light",
-            "c": "Good over Evil",
-            "d": "Ignorance over Knowledge"
+            "d": "Both are same"
         },
         "correct_answers": {
             "a_correct": "false",
@@ -120,12 +75,27 @@
         }
     },
     {
-        "question": "In which forest did Rama, Sita, and Lakshmana spend their exile?",
+        "question": "What is 2 x 4?",
         "answers": {
-            "a": "Khandava Forest",
-            "b": "Dandaka Forest",
-            "c": "Gir Forest",
-            "d": "Sundarbans Forest"
+            "a": "6",
+            "b": "7",
+            "c": "8",
+            "d": "9"
+        },
+        "correct_answers": {
+            "a_correct": "false",
+            "b_correct": "false",
+            "c_correct": "true",
+            "d_correct": "false"
+        }
+    },
+    {
+        "question": "How many sides does a triangle have?",
+        "answers": {
+            "a": "2",
+            "b": "3",
+            "c": "4",
+            "d": "5"
         },
         "correct_answers": {
             "a_correct": "false",
@@ -135,12 +105,42 @@
         }
     },
     {
-        "question": "What animal helped Rama cross the ocean to Lanka?",
+        "question": "What comes next: 2, 4, 6, ?",
         "answers": {
-            "a": "Elephant",
-            "b": "Horse",
-            "c": "Monkeys",
-            "d": "Lion"
+            "a": "7",
+            "b": "8",
+            "c": "9",
+            "d": "10"
+        },
+        "correct_answers": {
+            "a_correct": "false",
+            "b_correct": "true",
+            "c_correct": "false",
+            "d_correct": "false"
+        }
+    },
+    {
+        "question": "Which shape is round?",
+        "answers": {
+            "a": "Square",
+            "b": "Triangle",
+            "c": "Circle",
+            "d": "Rectangle"
+        },
+        "correct_answers": {
+            "a_correct": "false",
+            "b_correct": "false",
+            "c_correct": "true",
+            "d_correct": "false"
+        }
+    },
+    {
+        "question": "What is 20 + 5?",
+        "answers": {
+            "a": "15",
+            "b": "20",
+            "c": "25",
+            "d": "30"
         },
         "correct_answers": {
             "a_correct": "false",
