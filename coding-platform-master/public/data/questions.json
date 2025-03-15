@@ -1,0 +1,152 @@
+[
+    {
+        "question": "\"Do Bailo Ki Katha\" ke lekhak kaun hai?",
+        "answers": {
+            "a": "Premchand",
+            "b": "Jaishankar Prasad",
+            "c": "Mahadevi Verma",
+            "d": "Surya Kant Tripathi 'Nirala'"
+        },
+        "correct_answers": {
+            "a_correct": "true",
+            "b_correct": "false",
+            "c_correct": "false",
+            "d_correct": "false"
+        }
+    },
+    {
+        "question": "Heera aur Moti dono kaun the?",
+        "answers": {
+            "a": "Manushya",
+            "b": "Ghode",
+            "c": "Bail",
+            "d": "Kutte"
+        },
+        "correct_answers": {
+            "a_correct": "false",
+            "b_correct": "false",
+            "c_correct": "true",
+            "d_correct": "false"
+        }
+    },
+    {
+        "question": "Jhuri ke pas kitne bail the?",
+        "answers": {
+            "a": "Ek",
+            "b": "Do",
+            "c": "Teen",
+            "d": "Char"
+        },
+        "correct_answers": {
+            "a_correct": "false",
+            "b_correct": "true",
+            "c_correct": "false",
+            "d_correct": "false"
+        }
+    },
+    {
+        "question": "Heera aur Moti ko pahli baar kahan bandha gaya?",
+        "answers": {
+            "a": "Jhuri ke ghar",
+            "b": "Kashi ke ghar",
+            "c": "Gayatri ke ghar",
+            "d": "Daadi ke ghar"
+        },
+        "correct_answers": {
+            "a_correct": "true",
+            "b_correct": "false",
+            "c_correct": "false",
+            "d_correct": "false"
+        }
+    },
+    {
+        "question": "Heera aur Moti ko kisne kharida tha?",
+        "answers": {
+            "a": "Jhuri",
+            "b": "Gaya",
+            "c": "Kashi",
+            "d": "Dadi"
+        },
+        "correct_answers": {
+            "a_correct": "false",
+            "b_correct": "true",
+            "c_correct": "false",
+            "d_correct": "false"
+        }
+    },
+    {
+        "question": "Gaya, Jhuri ka kaun tha?",
+        "answers": {
+            "a": "Bhai",
+            "b": "Bhatija",
+            "c": "Sala",
+            "d": "Dost"
+        },
+        "correct_answers": {
+            "a_correct": "false",
+            "b_correct": "false",
+            "c_correct": "true",
+            "d_correct": "false"
+        }
+    },
+    {
+        "question": "Heera aur Moti ne kis se dosti ki?",
+        "answers": {
+            "a": "Kutte se",
+            "b": "Gadhe se",
+            "c": "Ek chhoti bacchi se",
+            "d": "Kisi se nahi"
+        },
+        "correct_answers": {
+            "a_correct": "false",
+            "b_correct": "false",
+            "c_correct": "true",
+            "d_correct": "false"
+        }
+    },
+    {
+        "question": "Saanand ki vyakhya kya hai?",
+        "answers": {
+            "a": "Bhag jana",
+            "b": "Khushi",
+            "c": "Dukh",
+            "d": "Gussa"
+        },
+        "correct_answers": {
+            "a_correct": "false",
+            "b_correct": "true",
+            "c_correct": "false",
+            "d_correct": "false"
+        }
+    },
+    {
+        "question": "Kanjihous mein band pashuon ki dekhbhal kaun karta tha?",
+        "answers": {
+            "a": "Chowkidaar",
+            "b": "Daroga",
+            "c": "Thakur",
+            "d": "Pathik"
+        },
+        "correct_answers": {
+            "a_correct": "a_correct",
+            "b_correct": "false",
+            "c_correct": "false",
+            "d_correct": "false"
+        }
+    },
+    {
+        "question": "Kisne Bailo ko Nilam hone se bachaya?",
+        "answers": {
+            "a": "Jhuri",
+            "b": "Gaya",
+            "c": "Heera and Moti",
+            "d": "Sadhu"
+        },
+        "correct_answers": {
+            "a_correct": "false",
+            "b_correct": "false",
+            "c_correct": "true",
+            "d_correct": "false"
+        }
+    }
+]
