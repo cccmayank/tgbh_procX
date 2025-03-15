@@ -73,7 +73,7 @@ function App() {
       element: <Response />,
     },
     {
-      path: "/result",
+      path: "/results",
       element: <Results />,
     },
   ]);

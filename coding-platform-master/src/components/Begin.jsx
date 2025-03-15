@@ -1,11 +1,16 @@
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 const Begin = () => {
   const navigate = useNavigate();
+  const [name, setName] = useState(""); // State to store the user's name
 
   const handleStartTest = () => {
-    navigate("/exam");
+    if (name.trim() === "") {
+      alert("Please enter your name to proceed."); // Validation to ensure the name is not empty
+      return;
+    }
+    navigate("/exam", { state: { name } }); // Pass the name to the next route
   };
 
   return (
@@ -30,6 +35,24 @@ const Begin = () => {
           <li>Audio and video will be monitored</li>
           <li>The test will begin when you click "Start Test."</li>
         </ul>
+
+        {/* Input for the user's name */}
+        <div className="mb-6">
+          <label htmlFor="name" className="block text-lg font-medium mb-2">
+            Enter your name as a digital signature:
+          </label>
+          <input
+            type="text"
+            id="name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black"
+            placeholder="Your Name"
+            required
+          />
+        </div>
+
+        {/* Start Test Button */}
         <button
           onClick={handleStartTest}
           className="text-lg font-medium bg-black text-white py-3 px-6 rounded-md hover:bg-gray-800 transition duration-300"

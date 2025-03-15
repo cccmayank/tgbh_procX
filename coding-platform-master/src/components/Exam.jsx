@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation} from "react-router-dom";
 
 const CODING_QUESTIONS = [
   {
@@ -370,6 +370,8 @@ const CodingSection = ({ currentQuestion, onSubmit }) => {
 
 const Exam = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const name = location.state?.name || "Unknown";
   const [timeLeft, setTimeLeft] = useState(600);
   const [selectedAnswers, setSelectedAnswers] = useState({});
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
@@ -738,7 +740,7 @@ const Exam = () => {
     sessionStorage.setItem("examEndReason", reason);
     sessionStorage.setItem("codingQuestions", JSON.stringify(CODING_QUESTIONS));
   
-    navigate("/result");
+    navigate("/results", {state: {name }});
   };
   if (isInitialCheck) {
     return (
