@@ -75,7 +75,7 @@ const Landing = () => {
                   whileTap={{ scale: 0.97 }}
                   className="px-4 py-2 bg-zinc-100 rounded-md text-zinc-800 hover:bg-zinc-200 transition-colors"
                 >
-                  Dashboard
+                  Admin Dashboard
                 </motion.button>
               </Link>
             </div>
