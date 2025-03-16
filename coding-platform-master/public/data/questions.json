@@ -2,30 +2,60 @@
     {
         "question": "What is 5 + 3?",
         "answers": {
-            "a": "7",
-            "b": "8",
-            "c": "9",
-            "d": "2"
+            "a": "6",
+            "b": "7",
+            "c": "8",
+            "d": "9"
         },
         "correct_answers": {
             "a_correct": "false",
-            "b_correct": "true",
+            "b_correct": "false",
+            "c_correct": "true",
+            "d_correct": "false"
+        }
+    },
+    {
+        "question": "What is the optimal buffer size for minimizing latency in a real-time audio processing pipeline utilizing a multi-threaded, low-level operating system, considering the trade-off between CPU load, interrupt handling overhead, and the potential for buffer underruns, assuming a sample rate of 44.1kHz and a desired audio fidelity of 16 bits?",
+        "answers": {
+            "a": "64 samples",
+            "b": "256 samples",
+            "c": "1024 samples",
+            "d": "512 samples"
+        },
+        "correct_answers": {
+            "a_correct": "false",
+            "b_correct": "false",
             "c_correct": "false",
             "d_correct": "false"
         }
     },
     {
-        "question": "In the context of quantum entanglement, which of the following best describes the correlated state between two entangled particles, assuming their spin properties are observed at distant locations?",
+        "question": "What comes after 12?",
         "answers": {
-            "a": "The particles' spins are always aligned in the same direction regardless of the measurement axis.",
-            "b": "The particles' spins are always anti-correlated, meaning if one is measured as 'up' along a certain axis, the other is instantly measured as 'down' along the same axis.",
-            "c": "The particles' spins are randomly oriented and uncorrelated until a measurement is made on one particle, instantly collapsing the other's spin state.",
-            "d": "The particles exhibit classical correlation, where their spin states were determined at the moment of entanglement but remain unknown until measured, without instantaneous influence."
+            "a": "10",
+            "b": "11",
+            "c": "13",
+            "d": "14"
         },
         "correct_answers": {
             "a_correct": "false",
-            "b_correct": "true",
-            "c_correct": "false",
+            "b_correct": "false",
+            "c_correct": "true",
+            "d_correct": "false"
+        }
+    },
+    {
+        "question": "Which shape has 3 sides?",
+        "answers": {
+            "a": "Square",
+            "b": "Circle",
+            "c": "Triangle",
+            "d": "Rectangle"
+        },
+        "correct_answers": {
+            "a_correct": "false",
+            "b_correct": "false",
+            "c_correct": "true",
             "d_correct": "false"
         }
     },
@@ -45,12 +75,12 @@
         }
     },
     {
-        "question": "If you have 6 apples and you give 2 away, how many do you have left?",
+        "question": "What is 2 x 2?",
         "answers": {
             "a": "3",
             "b": "4",
             "c": "5",
-            "d": "8"
+            "d": "6"
         },
         "correct_answers": {
             "a_correct": "false",
@@ -60,42 +90,12 @@
         }
     },
     {
-        "question": "Which number is bigger: 12 or 8?",
+        "question": "Which number is bigger: 7 or 5?",
         "answers": {
-            "a": "8",
-            "b": "Neither",
-            "c": "12",
-            "d": "Both are same"
-        },
-        "correct_answers": {
-            "a_correct": "false",
-            "b_correct": "false",
-            "c_correct": "true",
-            "d_correct": "false"
-        }
-    },
-    {
-        "question": "What is 2 x 4?",
-        "answers": {
-            "a": "6",
+            "a": "5",
             "b": "7",
-            "c": "8",
-            "d": "9"
-        },
-        "correct_answers": {
-            "a_correct": "false",
-            "b_correct": "false",
-            "c_correct": "true",
-            "d_correct": "false"
-        }
-    },
-    {
-        "question": "How many sides does a triangle have?",
-        "answers": {
-            "a": "2",
-            "b": "3",
-            "c": "4",
-            "d": "5"
+            "c": "They are the same",
+            "d": "None"
         },
         "correct_answers": {
             "a_correct": "false",
@@ -105,27 +105,12 @@
         }
     },
     {
-        "question": "What comes next: 2, 4, 6, ?",
+        "question": "What is 8 - 2?",
         "answers": {
-            "a": "7",
-            "b": "8",
-            "c": "9",
-            "d": "10"
-        },
-        "correct_answers": {
-            "a_correct": "false",
-            "b_correct": "true",
-            "c_correct": "false",
-            "d_correct": "false"
-        }
-    },
-    {
-        "question": "Which shape is round?",
-        "answers": {
-            "a": "Square",
-            "b": "Triangle",
-            "c": "Circle",
-            "d": "Rectangle"
+            "a": "4",
+            "b": "5",
+            "c": "6",
+            "d": "7"
         },
         "correct_answers": {
             "a_correct": "false",
@@ -135,12 +120,27 @@
         }
     },
     {
-        "question": "What is 20 + 5?",
+        "question": "Count the ducks: \ud83e\udd86\ud83e\udd86\ud83e\udd86. How many are there?",
         "answers": {
-            "a": "15",
-            "b": "20",
-            "c": "25",
-            "d": "30"
+            "a": "One",
+            "b": "Two",
+            "c": "Three",
+            "d": "Four"
+        },
+        "correct_answers": {
+            "a_correct": "false",
+            "b_correct": "false",
+            "c_correct": "true",
+            "d_correct": "false"
+        }
+    },
+    {
+        "question": "What is 1 + 1?",
+        "answers": {
+            "a": "0",
+            "b": "1",
+            "c": "2",
+            "d": "3"
         },
         "correct_answers": {
             "a_correct": "false",

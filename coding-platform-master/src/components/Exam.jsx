@@ -1,6 +1,27 @@
-import React, { useState, useEffect, useRef } from "react";
-import { useNavigate, useLocation} from "react-router-dom";
+import React, { useState, useEffect, useRef, useCallback } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 
+// Risk score weights and threshold
+const RISK_SCORE_WEIGHTS = {
+  tabSwitch: 0.5, // Score for tab switch violation
+  windowBlur: 0.5, // Score for window blur violation
+  rightClick: 1, // Score for right-click violation
+  cellphone: 1, // Score for cellphone detection
+  noPerson: 1, // Score for no person detected
+  multiplePeople: 1, // Score for multiple people detected
+  sound: 1, // Score for suspicious sound detection
+};
+
+const RISK_SCORE_THRESHOLD = 6; // Terminate exam if risk score >= 3
+
+// Calculate risk score based on warnings
+const calculateRiskScore = (warnings) => {
+  let riskScore = 0;
+  for (const [key, value] of Object.entries(warnings)) {
+    riskScore += value * (RISK_SCORE_WEIGHTS[key] || 0);
+  }
+  return riskScore;
+};
 const CODING_QUESTIONS = [
   {
     id: 1,
@@ -63,13 +84,13 @@ const CODING_QUESTIONS = [
         }
         return new int[]{};
     }
-}`
+}`,
     },
     complexity: {
       time: "O(n)",
       space: "O(n)",
-      explanation: "Uses a hash map to store previously seen numbers, allowing for O(1) lookups. One pass through the array gives us O(n) time complexity."
-    }
+      explanation: "Uses a hash map to store previously seen numbers, allowing for O(1) lookups. One pass through the array gives us O(n) time complexity.",
+    },
   },
   {
     id: 2,
@@ -132,19 +153,20 @@ const CODING_QUESTIONS = [
         }
         return true;
     }
-}`
+}`,
     },
     complexity: {
       time: "O(n/2) ≈ O(n)",
       space: "O(1)",
-      explanation: "Uses two pointers to check characters from both ends, meeting in the middle. Only requires constant extra space."
-    }
-  }
+      explanation: "Uses two pointers to check characters from both ends, meeting in the middle. Only requires constant extra space.",
+    },
+  },
 ];
+
 const analyzeSolution = (code, question) => {
   const isOptimal = {
     optimal: false,
-    reason: ""
+    reason: "",
   };
 
   if (question.title === "Two Sum") {
@@ -232,7 +254,7 @@ const executeCode = async (code, language, testCases, currentQuestion) => {
   return {
     success: results.some((r) => r.passed),
     results,
-    optimization: optimizationAnalysis
+    optimization: optimizationAnalysis,
   };
 };
 
@@ -243,10 +265,9 @@ const CodingSection = ({ currentQuestion, onSubmit }) => {
   const [isRunning, setIsRunning] = useState(false);
   const [testsPassed, setTestsPassed] = useState(0);
 
-  // Add useEffect to update code when question changes
   useEffect(() => {
     setCode(currentQuestion.defaultCode[language]);
-    setResults(null); // Reset results when question changes
+    setResults(null);
     setTestsPassed(0);
   }, [currentQuestion, language]);
 
@@ -269,12 +290,12 @@ const CodingSection = ({ currentQuestion, onSubmit }) => {
     setIsRunning(false);
 
     onSubmit({
-      questionId: currentQuestion.id, // Add question ID to track which question this is
+      questionId: currentQuestion.id,
       code,
       language,
       testsPassed: passed,
       totalTests: currentQuestion.testCases.length,
-      optimization: executionResults.optimization
+      optimization: executionResults.optimization,
     });
   };
 
@@ -368,619 +389,605 @@ const CodingSection = ({ currentQuestion, onSubmit }) => {
   );
 };
 
-const Exam = () => {
-  const navigate = useNavigate();
-  const location = useLocation();
-  const name = location.state?.name || "Unknown";
-  const [timeLeft, setTimeLeft] = useState(600);
-  const [selectedAnswers, setSelectedAnswers] = useState({});
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [isExamOver, setIsExamOver] = useState(false);
-  const [isNPressed, setIsNPressed] = useState(false);
-  const nKeyRef = useRef(false);
-  const [status, setStatus] = useState({
-    person_count: 0,
-    cellphone_detected: false,
-  });
-  const [warnings, setWarnings] = useState({
-    tabSwitch: 0,
-    windowBlur: 0,
-    cellphone: 0,
-    person: 0,
-    noPerson: 0,
-    multiplePeople: 0,
-    sound: 0, // Add this line
-  });
-  const [alerts, setAlerts] = useState([]);
-  const alertIdCounter = useRef(0);
-  const monitoringInterval = useRef(null);
-  const visibilityTimeout = useRef(null);
-  const blurTimeout = useRef(null);
-  const [isInitialCheck, setIsInitialCheck] = useState(true);
-  const [isCheckPassed, setIsCheckPassed] = useState(false);
-  const [checkStatus, setCheckStatus] = useState("Initializing...");
-  const [examSection, setExamSection] = useState("mcq");
-  const [currentCodingIndex, setCurrentCodingIndex] = useState(0);
-  const [codingAnswers, setCodingAnswers] = useState({});
-  // Using imported questions data directly
-  const [data, setData] = useState([]);
-  useEffect(() => {
-    // Right-click disable karne ke liye handler
-    const handleContextMenu = (event) => {
-      event.preventDefault(); // Right-click prevent karein
-      addAlert("⚠️ Right-click is disabled during the exam!", "warning"); // Warning show karein
-    };
-  
-    // Event listener add karein
-    window.addEventListener("contextmenu", handleContextMenu);
-  
-    // Cleanup function
-    return () => {
-      window.removeEventListener("contextmenu", handleContextMenu);
-    };
-  }, []);
-  
-  useEffect(() => {
-    fetch("/data/questions.json")
-      .then((response) => response.json())
-      .then((data) => {
-        setData(data); // Set the MCQ questions data
-      })
-      .catch((error) => {
-        console.error("Error loading questions:", error);
+    const Exam = () => {
+      const navigate = useNavigate();
+      const location = useLocation();
+      const name = location.state?.name || "Unknown";
+      const [riskScore, setRiskScore] = useState(0);
+      const [timeLeft, setTimeLeft] = useState(600);
+      const [selectedAnswers, setSelectedAnswers] = useState({});
+      const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+      const [isExamOver, setIsExamOver] = useState(false);
+      const [isNPressed, setIsNPressed] = useState(false);
+      const nKeyRef = useRef(false);
+      const [status, setStatus] = useState({
+        person_count: 0,
+        cellphone_detected: false,
       });
-  }, []);
-
- 
-  useEffect(() => {
-    const handleKeyPress = (event) => {
-      if (event.key === "n" || event.key === "N") {
-        nKeyRef.current = true;
-        setIsNPressed(true);
-      } else if (event.key === "k" || event.key === "K") {
-        if (!isInitialCheck) {
-          setWarnings((prev) => {
-            const newCount = prev.sound + 1;
-            if (newCount === 1) {
-              addAlert("⚠️ Warning: Suspicious sound detected!", "warning");
-            } else if (newCount >= 3) {
-              handleExamEnd("Test terminated: Suspicious background noise detected");
-            }
-            return { ...prev, sound: newCount };
-          });
+      const [warnings, setWarnings] = useState({
+        tabSwitch: 0,
+        windowBlur: 0,
+        rightClick: 0,
+        cellphone: 0,
+        noPerson: 0,
+        multiplePeople: 0,
+        sound: 0,
+      });
+      const [alerts, setAlerts] = useState([]);
+      const alertIdCounter = useRef(0);
+      const monitoringInterval = useRef(null);
+      const visibilityTimeout = useRef(null);
+      const blurTimeout = useRef(null);
+      const [isInitialCheck, setIsInitialCheck] = useState(true);
+      const [isCheckPassed, setIsCheckPassed] = useState(false);
+      const [checkStatus, setCheckStatus] = useState("Initializing...");
+      const [examSection, setExamSection] = useState("mcq");
+      const [currentCodingIndex, setCurrentCodingIndex] = useState(0);
+      const [codingAnswers, setCodingAnswers] = useState({});
+      const [data, setData] = useState([]);
+    
+      const addAlert = useCallback((message, type = "warning") => {
+        const id = alertIdCounter.current++;
+        setAlerts((prev) => [...prev, { id, message, type }]);
+        if (type === "warning") {
+          setTimeout(() => {
+            setAlerts((prev) => prev.filter((alert) => alert.id !== id));
+          }, 5000);
         }
-      }
-    };
-  
-    window.addEventListener("keydown", handleKeyPress);
-    return () => window.removeEventListener("keydown", handleKeyPress);
-  }, [isInitialCheck]);
-
-  useEffect(() => {
-    if (isInitialCheck) {
-      startProctoring();
-      checkEnvironment();
-      const cleanup = monitorTabSwitch();
-      return () => {
-        cleanup();
-        stopProctoring();
-      };
-    }
-  }, []);
-
-  useEffect(() => {
-    if (isCheckPassed && !isExamOver) {
-      monitoringInterval.current = setInterval(() => {
-        fetch("http://127.0.0.1:5000/status")
+      }, []);
+    
+      const captureViolationScreenshot = useCallback(() => {
+        fetch("http://127.0.0.1:5000/screenshot")
           .then((response) => response.json())
           .then((data) => {
-            setStatus(data);
-            handleViolations(data);
+            console.log("Violation screenshot captured:", data.filename);
           })
           .catch((error) => {
-            console.error("Monitoring error:", error);
-            addAlert("⚠️ Proctoring system connection lost!", "error");
+            console.error("Error capturing screenshot:", error);
           });
-      }, 1000);
+      }, []);
 
-      return () => {
-        if (monitoringInterval.current) {
-          clearInterval(monitoringInterval.current);
-        }
-      };
-    }
-  }, [isCheckPassed, isExamOver]);
-
-  useEffect(() => {
-    if (timeLeft > 0 && !isExamOver && isCheckPassed) {
-      const timer = setTimeout(() => setTimeLeft((prev) => prev - 1), 1000);
-      return () => clearTimeout(timer);
-    } else if (timeLeft === 0) {
-      handleExamEnd("Time's up!");
-    }
-  }, [timeLeft, isExamOver, isCheckPassed]);
-
-  const startProctoring = () => {
-    fetch("http://127.0.0.1:5000/start")
-      .then((response) => response.json())
-      .catch((error) => {
-        console.error("Error starting proctoring:", error);
-        addAlert("Failed to start proctoring system", "error");
-      });
-  };
-
-  const stopProctoring = () => {
-    fetch("http://127.0.0.1:5000/stop")
-      .then((response) => response.json())
-      .catch((error) => console.error("Error stopping proctoring:", error));
-  };
-
-  const monitorTabSwitch = () => {
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === "hidden") {
-        clearTimeout(visibilityTimeout.current);
-        visibilityTimeout.current = setTimeout(() => {
-          setWarnings((prev) => {
-            const newCount = prev.tabSwitch + 1;
-            if (newCount === 1) {
-              addAlert("⚠️ Warning: Tab switch detected!", "warning");
-              captureViolationScreenshot();
-            } else if (newCount >= 2) {
-              handleExamEnd("Test terminated due to multiple tab switches");
-            }
-            return { ...prev, tabSwitch: newCount };
+      const startProctoring = useCallback(() => {
+        fetch("http://127.0.0.1:5000/start")
+          .then((response) => response.json())
+          .catch((error) => {
+            console.error("Error starting proctoring:", error);
+            addAlert("Failed to start proctoring system", "error");
           });
-        }, 200);
-      }
-    };
+      }, [addAlert]);
 
-    const handleWindowBlur = () => {
-      if (isInitialCheck) {
-        clearTimeout(blurTimeout.current);
-        blurTimeout.current = setTimeout(() => {
-          setWarnings((prev) => {
-            const newCount = prev.windowBlur + 1;
-            if (newCount === 1) {
-              addAlert("⚠️ Warning: Window unfocused!", "warning");
-              captureViolationScreenshot();
-            } else if (newCount >= 2) {
-              handleExamEnd(
-                "Test terminated due to multiple window unfocus events"
-              );
-            }
-            return { ...prev, windowBlur: newCount };
-          });
-        }, 200);
-      }
-    };
-
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-    window.addEventListener("blur", handleWindowBlur);
-
-    return () => {
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
-      window.removeEventListener("blur", handleWindowBlur);
-      clearTimeout(visibilityTimeout.current);
-      clearTimeout(blurTimeout.current);
-    };
-  };
-
-  const handleViolations = (data) => {
-    if (data.person_count === 0) {
-      setWarnings((prev) => {
-        const newCount = prev.noPerson + 1;
-        if (newCount === 1) {
-          addAlert("⚠️ Warning: No person detected!", "warning");
-          captureViolationScreenshot();
-        } else if (newCount >= 3) {
-          handleExamEnd(
-            "Test terminated: Extended period with no person detected"
-          );
-        }
-        return { ...prev, noPerson: newCount };
-      });
-    } else {
-      setWarnings((prev) => ({ ...prev, noPerson: 0 }));
-    }
-
-    if (data.person_count > 1) {
-      setWarnings((prev) => {
-        const newCount = prev.multiplePeople + 1;
-        if (newCount === 1) {
-          addAlert("⚠️ Warning: Multiple people detected!", "warning");
-          captureViolationScreenshot();
-        } else if (newCount >= 3) {
-          handleExamEnd("Test terminated: Multiple people detected repeatedly");
-        }
-        return { ...prev, multiplePeople: newCount };
-      });
-    } else {
-      setWarnings((prev) => ({ ...prev, multiplePeople: 0 }));
-    }
-
-    if (data.cellphone_detected) {
-      setWarnings((prev) => {
-        const newCount = prev.cellphone + 1;
-        if (newCount === 1) {
-          addAlert("⚠️ Warning: Cell phone detected!", "warning");
-          captureViolationScreenshot();
-        } else if (newCount >= 2) {
-          handleExamEnd("Test terminated: Cell phone detected multiple times");
-        }
-        return { ...prev, cellphone: newCount };
-      });
-    } else {
-      setWarnings((prev) => ({ ...prev, cellphone: 0 }));
-    }
-  };
-
-  const checkEnvironment = () => {
-    const checkInterval = setInterval(() => {
-      fetch("http://127.0.0.1:5000/status")
-        .then((response) => response.json())
-        .then((data) => {
-          setStatus(data);
-
-          if (data.cellphone_detected) {
-            setCheckStatus("⚠️ Please remove any phones from the camera view");
-          } else if (data.person_count === 0) {
-            setCheckStatus(
-              "👤 Please position yourself in front of the camera"
+      const stopProctoring = useCallback(() => {
+        fetch("http://127.0.0.1:5000/stop")
+          .then((response) => response.json())
+          .catch((error) => console.error("Error stopping proctoring:", error));
+      }, []);
+    
+      const handleExamEnd = useCallback(
+        (reason) => {
+          setIsExamOver(true);
+          stopProctoring();
+    
+          // Create detailed reason with risk score breakdown
+          let detailedReason = reason;
+          if (reason.includes("Risk score exceeded")) {
+            const riskBreakdown = Object.entries(warnings)
+              .filter(([_, value]) => value > 0)
+              .map(([key, value]) => `${key}: ${value} × ${RISK_SCORE_WEIGHTS[key] || 0}`)
+              .join(", ");
+            detailedReason = `${reason} (Violations: ${riskBreakdown})`;
+          }
+    
+          const mcqScore = Object.entries(selectedAnswers).reduce((acc, [idx, answer]) => {
+            const correctAnswers = data[idx].correct_answers;
+            const correctAnswer = Object.entries(correctAnswers).find(
+              ([key, value]) => value === "true"
             );
-          } else if (data.person_count > 1) {
-            setCheckStatus("⚠️ Only one person should be visible");
-          } else if (data.person_count === 1 && !data.cellphone_detected) {
-            if (!nKeyRef.current) {
-              setCheckStatus("Authorizing...");
-            } else {
-              setCheckStatus(
-                "✅ Environment check passed! Starting exam in 3 seconds..."
-              );
-              clearInterval(checkInterval);
-              setTimeout(() => {
-                setIsInitialCheck(false);
-                setIsCheckPassed(true);
-              }, 3000);
+            const correctKey = correctAnswer ? correctAnswer[0].replace("_correct", "") : null;
+            const isCorrect = data[idx].answers[correctKey] === answer;
+            return acc + (isCorrect ? 1 : 0);
+          }, 0);
+    
+          const formattedMcqAnswers = Object.entries(selectedAnswers).map(([idx, answer]) => {
+            const questionIndex = parseInt(idx);
+            const question = data[questionIndex];
+            if (!question) return null;
+    
+            const correctAnswers = question.correct_answers;
+            const correctAnswerEntry = Object.entries(correctAnswers).find(
+              ([key, value]) => value === "true"
+            );
+            if (!correctAnswerEntry) return null;
+    
+            const correctKey = correctAnswerEntry[0].replace("_correct", "");
+            const correctAnswer = question.answers[correctKey];
+    
+            return {
+              questionIndex,
+              question: question.question,
+              selectedAnswer: answer,
+              correctAnswer,
+              isCorrect: correctAnswer === answer,
+            };
+          }).filter(item => item !== null);
+    
+          const formattedCodingAnswers = CODING_QUESTIONS.reduce((acc, question) => {
+            const answer = codingAnswers[question.id - 1] || {
+              code: question.defaultCode.python,
+              language: "python",
+              testsPassed: 0,
+              totalTests: question.testCases.length,
+              optimization: { optimal: false, reason: "Question not attempted" },
+            };
+    
+            acc[question.id - 1] = {
+              ...answer,
+              questionId: question.id,
+              title: question.title,
+              description: question.description,
+              attempted: !!codingAnswers[question.id - 1],
+            };
+            return acc;
+          }, {});
+    
+          const finalResults = {
+            mcq: {
+              answers: formattedMcqAnswers,
+              score: mcqScore,
+              total: data.length,
+            },
+            coding: {
+              answers: formattedCodingAnswers,
+              score: Object.values(codingAnswers).reduce((acc, result) => {
+                return acc + (result.testsPassed || 0);
+              }, 0),
+              total: CODING_QUESTIONS.reduce((acc, _) => acc + 2, 0),
+            },
+            riskScore: riskScore,
+            riskBreakdown: Object.entries(warnings)
+              .filter(([_, value]) => value > 0)
+              .reduce((acc, [key, value]) => {
+                acc[key] = {
+                  count: value,
+                  weight: RISK_SCORE_WEIGHTS[key] || 0,
+                  impact: value * (RISK_SCORE_WEIGHTS[key] || 0),
+                };
+                return acc;
+              }, {}),
+          };
+    
+          // Store results and questions
+          sessionStorage.setItem("examResults", JSON.stringify(finalResults));
+          sessionStorage.setItem("examEndReason", detailedReason);
+          sessionStorage.setItem("codingQuestions", JSON.stringify(CODING_QUESTIONS));
+    
+          navigate("/results", { state: { name } });
+        },
+        [selectedAnswers, data, codingAnswers, navigate, name, warnings, riskScore, stopProctoring]
+      );
+      // Now define handleViolations which uses captureViolationScreenshot
+      const handleViolations = useCallback((data) => {
+        setWarnings((prev) => {
+          const newWarnings = { ...prev };
+          let screenshotTaken = false;
+      
+          // Check if person detection has changed since last check
+          if (data.person_count === 0) {
+            newWarnings.noPerson += 1; // Increment instead of setting to 1
+            addAlert("⚠️ Warning: No person detected!", "warning");
+            screenshotTaken = true;
+            captureViolationScreenshot();
+          }
+      
+          if (data.person_count > 1) {
+            newWarnings.multiplePeople += 1; // Increment instead of setting to 1
+            addAlert("⚠️ Warning: Multiple people detected!", "warning");
+            if (!screenshotTaken) {
+              captureViolationScreenshot();
+              screenshotTaken = true;
             }
           }
-        })
-        .catch((error) => {
-          console.error("Error:", error);
-          setCheckStatus("⚠️ Error connecting to proctoring system");
+      
+          if (data.cellphone_detected) {
+            newWarnings.cellphone += 1; // Increment instead of setting to 1
+            addAlert("⚠️ Warning: Cell phone detected!", "warning");
+            if (!screenshotTaken) {
+              captureViolationScreenshot();
+              screenshotTaken = true;
+            }
+          }
+      
+          const newRiskScore = calculateRiskScore(newWarnings);
+          setRiskScore(newRiskScore);
+      
+          if (newRiskScore >= RISK_SCORE_THRESHOLD) {
+            handleExamEnd(`Test terminated: Risk score exceeded threshold (${newRiskScore.toFixed(1)}/${RISK_SCORE_THRESHOLD})`);
+          }
+      
+          return newWarnings;
         });
-    }, 1000);
-
-    return () => clearInterval(checkInterval);
-  };
-
-  const captureViolationScreenshot = () => {
-    fetch("http://127.0.0.1:5000/screenshot")
-      .then((response) => response.json())
-      .then((data) =>
-        console.log("Violation screenshot captured:", data.filename)
-      )
-      .catch((error) => console.error("Error capturing screenshot:", error));
-  };
-
-  const addAlert = (message, type = "warning") => {
-    const id = alertIdCounter.current++;
-    setAlerts((prev) => [...prev, { id, message, type }]);
-    if (type === "warning") {
-      setTimeout(() => {
-        setAlerts((prev) => prev.filter((alert) => alert.id !== id));
-      }, 5000);
-    }
-  };
-
-  const handleAnswerSelect = (answer) => {
-    const newAnswers = {
-      ...selectedAnswers,
-      [currentQuestionIndex]: answer,
-    };
-    setSelectedAnswers(newAnswers);
-  };
-
-  const handleCodingSubmit = (codingResult) => {
-    const newCodingAnswers = {
-      ...codingAnswers,
-      [currentCodingIndex]: codingResult,
-    };
-    setCodingAnswers(newCodingAnswers);
-  };
-
-  const handleExamEnd = (reason) => {
-    setIsExamOver(true);
-    stopProctoring();
-  
-    // Calculate MCQ scores
-    const mcqScore = Object.entries(selectedAnswers).reduce(
-      (acc, [idx, answer]) => {
-        const correctAnswers = data[idx].correct_answers;
-        const correctAnswer = Object.entries(correctAnswers).find(
-          ([key, value]) => value === "true"
-        );
-        const correctKey = correctAnswer
-          ? correctAnswer[0].replace("_correct", "")
-          : null;
-        const isCorrect = data[idx].answers[correctKey] === answer;
-        return acc + (isCorrect ? 1 : 0);
-      },
-      0
-    );
-  
-    // Format MCQ answers with questions
-    const formattedMcqAnswers = Object.entries(selectedAnswers).map(([idx, answer]) => ({
-      questionIndex: parseInt(idx),
-      question: data[idx].question,
-      selectedAnswer: answer,
-      correctAnswer: data[idx].answers[
-        Object.entries(data[idx].correct_answers)
-          .find(([key, value]) => value === "true")[0]
-          .replace("_correct", "")
-      ],
-      isCorrect: data[idx].answers[
-        Object.entries(data[idx].correct_answers)
-          .find(([key, value]) => value === "true")[0]
-          .replace("_correct", "")
-      ] === answer
-    }));
-  
-    // Format coding answers with all attempted and unattempted questions
-    const formattedCodingAnswers = CODING_QUESTIONS.reduce((acc, question) => {
-      const answer = codingAnswers[question.id - 1] || {
-        code: question.defaultCode.python,
-        language: 'python',
-        testsPassed: 0,
-        totalTests: question.testCases.length,
-        optimization: { optimal: false, reason: "Question not attempted" }
-      };
-  
-      acc[question.id - 1] = {
-        ...answer,
-        questionId: question.id,
-        title: question.title,
-        description: question.description,
-        attempted: !!codingAnswers[question.id - 1]
-      };
-      return acc;
-    }, {});
-  
-    const finalResults = {
-      mcq: {
-        answers: formattedMcqAnswers,
-        score: mcqScore,
-        total: data.length,
-      },
-      coding: {
-        answers: formattedCodingAnswers,
-        score: Object.values(codingAnswers).reduce((acc, result) => {
-          return acc + (result.testsPassed || 0);
-        }, 0),
-        total: CODING_QUESTIONS.reduce((acc, _) => acc + 2, 0), // 2 test cases per question
-      },
-    };
-  
-    // Store results and questions
-    sessionStorage.setItem("examResults", JSON.stringify(finalResults));
-    sessionStorage.setItem("examEndReason", reason);
-    sessionStorage.setItem("codingQuestions", JSON.stringify(CODING_QUESTIONS));
-  
-    navigate("/results", {state: {name }});
-  };
-  if (isInitialCheck) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
-        <div className="p-8 bg-white rounded-lg shadow-lg max-w-md w-full text-center">
-          <h1 className="text-2xl font-bold mb-6">Environment Check</h1>
-          <div className="mb-6">
-            <div className="text-lg mb-4">{checkStatus}</div>
-            <div className="space-y-2">
-              <div className="flex items-center justify-between p-2 bg-gray-50 rounded">
-                <span>Camera Connected:</span>
-                <span className="font-bold">✅</span>
-              </div>
-              <div className="flex items-center justify-between p-2 bg-gray-50 rounded">
-                <span>Person Detected:</span>
-                <span
-                  className={`font-bold ${
-                    status.person_count === 1
-                      ? "text-green-600"
-                      : "text-red-600"
-                  }`}
-                >
-                  {status.person_count === 1 && isNPressed ? "✅" : "❌"}
-                </span>
-              </div>
-              <div className="flex items-center justify-between p-2 bg-gray-50 rounded">
-                <span>No Phone Detected:</span>
-                <span
-                  className={`font-bold ${
-                    !status.cellphone_detected
-                      ? "text-green-600"
-                      : "text-red-600"
-                  }`}
-                >
-                  {!status.cellphone_detected ? "✅" : "❌"}
-                </span>
-              </div>
-            </div>
-          </div>
-          <div className="text-sm text-gray-600">
-            Please ensure:
-            <ul className="list-disc text-left pl-5 mt-2">
-              <li>You are clearly visible in the camera</li>
-              <li>No phones or other devices are visible</li>
-              <li>You are in a well-lit environment</li>
-              <li>You are the only person visible in the frame</li>
-              <li>Press 'N' when ready to start the exam</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-4">
-      <div className="w-full max-w-4xl bg-white rounded-lg shadow-lg p-6">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold">Online Exam</h1>
-          <div className="text-xl font-semibold">
-            Time Left: {Math.floor(timeLeft / 60)}:
-            {String(timeLeft % 60).padStart(2, "0")}
-          </div>
-        </div>
-
-        <div className="flex space-x-4 mb-6">
-          <button
-            onClick={() => setExamSection("mcq")}
-            className={`px-4 py-2 rounded-lg ${
-              examSection === "mcq"
-                ? "bg-blue-500 text-white"
-                : "bg-gray-200 hover:bg-gray-300"
-            }`}
-          >
-            Multiple Choice
-          </button>
-          <button
-            onClick={() => setExamSection("coding")}
-            className={`px-4 py-2 rounded-lg ${
-              examSection === "coding"
-                ? "bg-blue-500 text-white"
-                : "bg-gray-200 hover:bg-gray-300"
-            }`}
-          >
-            Coding Questions
-          </button>
-        </div>
-
-        {examSection === "mcq" ? (
-          <div>
-            <div className="flex justify-between mb-4">
-              <h2 className="text-lg font-semibold">
-                Question {currentQuestionIndex + 1} of {data.length}
-              </h2>
-              <span className="text-gray-600">
-                {selectedAnswers[currentQuestionIndex]
-                  ? "Answered"
-                  : "Not answered"}
-              </span>
-            </div>
-
-            <div className="mb-6">
-              <p className="text-lg mb-4">
-                {data[currentQuestionIndex]?.question}
-              </p>
-              <div className="space-y-3">
-                {data[currentQuestionIndex]?.answers &&
-                  Object.entries(data[currentQuestionIndex].answers)
-                    .filter(([key, value]) => value !== null)
-                    .map(([key, value], index) => (
-                      <div
-                        key={index}
-                        onClick={() => handleAnswerSelect(value)}
-                        className={`p-3 rounded-lg border cursor-pointer transition-colors
-                            ${
-                              selectedAnswers[currentQuestionIndex] === value
-                                ? "bg-blue-100 border-blue-500"
-                                : "hover:bg-gray-50"
-                            }`}
+      }, [addAlert, handleExamEnd]);
+      // Define checkEnvironment
+      const checkEnvironment = useCallback(() => {
+        const checkInterval = setInterval(() => {
+          fetch("http://127.0.0.1:5000/status")
+            .then((response) => response.json())
+            .then((data) => {
+              setStatus(data);
+    
+              if (data.cellphone_detected) {
+                setCheckStatus("⚠️ Please remove any phones from the camera view");
+              } else if (data.person_count === 0) {
+                setCheckStatus("👤 Please position yourself in front of the camera");
+              } else if (data.person_count > 1) {
+                setCheckStatus("⚠️ Only one person should be visible");
+              } else if (data.person_count === 1 && !data.cellphone_detected) {
+                if (!nKeyRef.current) {
+                  setCheckStatus("Authorizing...");
+                } else {
+                  setCheckStatus(
+                    "✅ Environment check passed! Starting exam in 3 seconds..."
+                  );
+                  clearInterval(checkInterval);
+                  setTimeout(() => {
+                    setIsInitialCheck(false);
+                    setIsCheckPassed(true);
+                  }, 3000);
+                }
+              }
+            })
+            .catch((error) => {
+              console.error("Error:", error);
+              setCheckStatus("⚠️ Error connecting to proctoring system");
+            });
+        }, 1000);
+    
+        return () => clearInterval(checkInterval);
+      }, []);
+    
+      // Now define all your event handlers and useEffect functions
+      useEffect(() => {
+        const handleVisibilityChange = () => {
+          if (document.visibilityState === "hidden" && !isExamOver && isCheckPassed) {
+            setWarnings((prev) => {
+              const newWarnings = { ...prev };
+              newWarnings.tabSwitch += 1; // Increment instead of setting to 1
+              addAlert("⚠️ Warning: Tab switch detected!", "warning");
+              return newWarnings;
+            });
+          }
+        };
+      
+        document.addEventListener("visibilitychange", handleVisibilityChange);
+        return () => {
+          document.removeEventListener("visibilitychange", handleVisibilityChange);
+        };
+      }, [addAlert, isExamOver, isCheckPassed]);
+    
+      // Handle right-click disable - only need one of these
+      useEffect(() => {
+        const handleContextMenu = (event) => {
+          event.preventDefault();
+          if (!isExamOver && isCheckPassed) {
+            setWarnings((prev) => {
+              const newWarnings = { ...prev };
+              newWarnings.rightClick += 1; // Increment instead of setting to 1
+              addAlert("⚠️ Warning: Right-click is disabled during the exam!", "warning");
+              return newWarnings;
+            });
+          }
+        };
+      
+        window.addEventListener("contextmenu", handleContextMenu);
+        return () => {
+          window.removeEventListener("contextmenu", handleContextMenu);
+        };
+      }, [addAlert, isExamOver, isCheckPassed]);
+    
+      // Handle key press events
+      useEffect(() => {
+        const handleKeyPress = (event) => {
+          if (event.key === "n" || event.key === "N") {
+            nKeyRef.current = true;
+            setIsNPressed(true);
+          } else if ((event.key === "k" || event.key === "K") && !isInitialCheck && !isExamOver) {
+            setWarnings((prev) => {
+              const newWarnings = { ...prev };
+              newWarnings.sound += 1; // Increment instead of setting to 1
+              addAlert("⚠️ Warning: Suspicious sound detected!", "warning");
+              return newWarnings;
+            });
+          }
+        };
+      
+        window.addEventListener("keydown", handleKeyPress);
+        return () => window.removeEventListener("keydown", handleKeyPress);
+      }, [isInitialCheck, addAlert, isExamOver]);
+    
+      // Initialize proctoring when checks start
+      useEffect(() => {
+        if (isInitialCheck) {
+          startProctoring();
+          checkEnvironment();
+        }
+      }, [isInitialCheck, startProctoring, checkEnvironment]);
+    
+      // Start monitoring when check is passed
+      useEffect(() => {
+        if (isCheckPassed && !isExamOver) {
+          monitoringInterval.current = setInterval(() => {
+            fetch("http://127.0.0.1:5000/status")
+              .then((response) => response.json())
+              .then((data) => {
+                setStatus(data);
+                handleViolations(data);
+              })
+              .catch((error) => {
+                console.error("Monitoring error:", error);
+                addAlert("⚠️ Proctoring system connection lost!", "error");
+              });
+          }, 1000);
+    
+          return () => {
+            if (monitoringInterval.current) {
+              clearInterval(monitoringInterval.current);
+            }
+          };
+        }
+      }, [isCheckPassed, isExamOver, handleViolations, addAlert]);
+    
+      // Handle time
+      useEffect(() => {
+        if (timeLeft > 0 && !isExamOver && isCheckPassed) {
+          const timer = setTimeout(() => setTimeLeft((prev) => prev - 1), 1000);
+          return () => clearTimeout(timer);
+        } else if (timeLeft === 0 && !isExamOver) {
+          handleExamEnd("Time's up!");
+        }
+      }, [timeLeft, isExamOver, isCheckPassed, handleExamEnd]);
+    
+      // Load questions
+      useEffect(() => {
+        fetch("/data/questions.json")
+          .then((response) => response.json())
+          .then((data) => {
+            setData(data);
+          })
+          .catch((error) => {
+            console.error("Error loading questions:", error);
+          });
+      }, []);
+    
+      // Define your component event handlers
+      const handleAnswerSelect = (answer) => {
+       
+          const newAnswers = {
+            ...selectedAnswers,
+            [currentQuestionIndex]: answer,
+          };
+          setSelectedAnswers(newAnswers);
+        };
+        
+        const handleCodingSubmit = (codingResult) => {
+          const newCodingAnswers = {
+            ...codingAnswers,
+            [currentCodingIndex]: codingResult,
+          };
+          setCodingAnswers(newCodingAnswers);
+        };
+      
+        // JSX rendering based on state
+        if (isInitialCheck) {
+          return (
+            <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
+              <div className="p-8 bg-white rounded-lg shadow-lg max-w-md w-full text-center">
+                <h1 className="text-2xl font-bold mb-6">Environment Check</h1>
+                <div className="mb-6">
+                  <div className="text-lg mb-4">{checkStatus}</div>
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between p-2 bg-gray-50 rounded">
+                      <span>Camera Connected:</span>
+                      <span className="font-bold">✅</span>
+                    </div>
+                    <div className="flex items-center justify-between p-2 bg-gray-50 rounded">
+                      <span>Person Detected:</span>
+                      <span
+                        className={`font-bold ${
+                          status.person_count === 1 ? "text-green-600" : "text-red-600"
+                        }`}
                       >
-                        {value}
-                      </div>
-                    ))}
+                        {status.person_count === 1 && isNPressed ? "✅" : "❌"}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between p-2 bg-gray-50 rounded">
+                      <span>No Phone Detected:</span>
+                      <span
+                        className={`font-bold ${
+                          !status.cellphone_detected ? "text-green-600" : "text-red-600"
+                        }`}
+                      >
+                        {!status.cellphone_detected ? "✅" : "❌"}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                <div className="text-sm text-gray-600">
+                  Please ensure:
+                  <ul className="list-disc text-left pl-5 mt-2">
+                    <li>You are clearly visible in the camera</li>
+                    <li>No phones or other devices are visible</li>
+                    <li>You are in a well-lit environment</li>
+                    <li>You are the only person visible in the frame</li>
+                    <li>Press 'N' when ready to start the exam</li>
+                  </ul>
+                </div>
               </div>
             </div>
-
-            <div className="flex justify-between">
-              <button
-                onClick={() =>
-                  setCurrentQuestionIndex((prev) => Math.max(0, prev - 1))
-                }
-                disabled={currentQuestionIndex === 0}
-                className="px-4 py-2 bg-blue-500 text-white rounded-lg disabled:opacity-50"
-              >
-                Previous
-              </button>
-              <button
-                onClick={() =>
-                  setCurrentQuestionIndex((prev) =>
-                    Math.min(data.length - 1, prev + 1)
-                  )
-                }
-                disabled={currentQuestionIndex === data.length - 1}
-                className="px-4 py-2 bg-blue-500 text-white rounded-lg disabled:opacity-50"
-              >
-                Next
-              </button>
+          );
+        }
+      
+        return (
+          <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-4">
+            <div className="w-full max-w-4xl bg-white rounded-lg shadow-lg p-6">
+              <div className="flex justify-between items-center mb-6">
+                <h1 className="text-2xl font-bold">Online Exam</h1>
+                <div className="text-xl font-semibold">
+                  Time Left: {Math.floor(timeLeft / 60)}:
+                  {String(timeLeft % 60).padStart(2, "0")}
+                </div>
+              </div>
+      
+              <div className="flex space-x-4 mb-6">
+                <button
+                  onClick={() => setExamSection("mcq")}
+                  className={`px-4 py-2 rounded-lg ${
+                    examSection === "mcq"
+                      ? "bg-blue-500 text-white"
+                      : "bg-gray-200 hover:bg-gray-300"
+                  }`}
+                >
+                  Multiple Choice
+                </button>
+                <button
+                  onClick={() => setExamSection("coding")}
+                  className={`px-4 py-2 rounded-lg ${
+                    examSection === "coding"
+                      ? "bg-blue-500 text-white"
+                      : "bg-gray-200 hover:bg-gray-300"
+                  }`}
+                >
+                  Coding Questions
+                </button>
+              </div>
+      
+              {examSection === "mcq" ? (
+                <div>
+                  <div className="flex justify-between mb-4">
+                    <h2 className="text-lg font-semibold">
+                      Question {currentQuestionIndex + 1} of {data.length}
+                    </h2>
+                    <span className="text-gray-600">
+                      {selectedAnswers[currentQuestionIndex] ? "Answered" : "Not answered"}
+                    </span>
+                  </div>
+      
+                  <div className="mb-6">
+                    <p className="text-lg mb-4">{data[currentQuestionIndex]?.question}</p>
+                    <div className="space-y-3">
+                      {data[currentQuestionIndex]?.answers &&
+                        Object.entries(data[currentQuestionIndex].answers)
+                          .filter(([key, value]) => value !== null)
+                          .map(([key, value], index) => (
+                            <div
+                              key={index}
+                              onClick={() => handleAnswerSelect(value)}
+                              className={`p-3 rounded-lg border cursor-pointer transition-colors ${
+                                selectedAnswers[currentQuestionIndex] === value
+                                  ? "bg-blue-100 border-blue-500"
+                                  : "hover:bg-gray-50"
+                              }`}
+                            >
+                              {value}
+                            </div>
+                          ))}
+                    </div>
+                  </div>
+      
+                  <div className="flex justify-between">
+                    <button
+                      onClick={() =>
+                        setCurrentQuestionIndex((prev) => Math.max(0, prev - 1))
+                      }
+                      disabled={currentQuestionIndex === 0}
+                      className="px-4 py-2 bg-blue-500 text-white rounded-lg disabled:opacity-50"
+                    >
+                      Previous
+                    </button>
+                    <button
+                      onClick={() =>
+                        setCurrentQuestionIndex((prev) =>
+                          Math.min(data.length - 1, prev + 1)
+                        )
+                      }
+                      disabled={currentQuestionIndex === data.length - 1}
+                      className="px-4 py-2 bg-blue-500 text-white rounded-lg disabled:opacity-50"
+                    >
+                      Next
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div>
+                  <div className="flex justify-between mb-4">
+                    <h2 className="text-lg font-semibold">
+                      Question {currentCodingIndex + 1} of {CODING_QUESTIONS.length}
+                    </h2>
+                  </div>
+      
+                  <CodingSection
+                    currentQuestion={CODING_QUESTIONS[currentCodingIndex]}
+                    onSubmit={handleCodingSubmit}
+                  />
+      
+                  <div className="flex justify-between mt-6">
+                    <button
+                      onClick={() =>
+                        setCurrentCodingIndex((prev) => Math.max(0, prev - 1))
+                      }
+                      disabled={currentCodingIndex === 0}
+                      className="px-4 py-2 bg-blue-500 text-white rounded-lg disabled:opacity-50"
+                    >
+                      Previous
+                    </button>
+                    <button
+                      onClick={() =>
+                        setCurrentCodingIndex((prev) =>
+                          Math.min(CODING_QUESTIONS.length - 1, prev + 1)
+                        )
+                      }
+                      disabled={currentCodingIndex === CODING_QUESTIONS.length - 1}
+                      className="px-4 py-2 bg-blue-500 text-white rounded-lg disabled:opacity-50"
+                    >
+                      Next
+                    </button>
+                  </div>
+                </div>
+              )}
+      
+              <div className="mt-6 flex justify-center">
+                <button
+                  onClick={() => handleExamEnd("Exam submitted by user")}
+                  className="px-6 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg"
+                >
+                  Submit Exam
+                </button>
+              </div>
+            </div>
+      
+            <div className="fixed top-4 right-4 w-80 space-y-2">
+              {alerts.map((alert) => (
+                <div
+                  key={alert.id}
+                  className={`p-4 rounded-lg shadow-lg ${
+                    alert.type === "error"
+                      ? "bg-red-500 text-white"
+                      : alert.type === "warning"
+                      ? "bg-yellow-100 text-yellow-800"
+                      : "bg-green-100 text-green-800"
+                  }`}
+                >
+                  {alert.message}
+                </div>
+              ))}
+            </div>
+      
+            <div className="fixed bottom-4 right-4 p-4 bg-white rounded-lg shadow-lg">
+              <div className="text-sm text-gray-600">Risk Score:</div>
+              <div className="text-xl font-bold">
+                {riskScore.toFixed(1)} / {RISK_SCORE_THRESHOLD}
+              </div>
             </div>
           </div>
-        ) : (
-          <div>
-            <div className="flex justify-between mb-4">
-              <h2 className="text-lg font-semibold">
-                Question {currentCodingIndex + 1} of {CODING_QUESTIONS.length}
-              </h2>
-            </div>
-
-            <CodingSection
-              currentQuestion={CODING_QUESTIONS[currentCodingIndex]}
-              onSubmit={handleCodingSubmit}
-            />
-
-            <div className="flex justify-between mt-6">
-              <button
-                onClick={() =>
-                  setCurrentCodingIndex((prev) => Math.max(0, prev - 1))
-                }
-                disabled={currentCodingIndex === 0}
-                className="px-4 py-2 bg-blue-500 text-white rounded-lg disabled:opacity-50"
-              >
-                Previous
-              </button>
-              <button
-                onClick={() =>
-                  setCurrentCodingIndex((prev) =>
-                    Math.min(CODING_QUESTIONS.length - 1, prev + 1)
-                  )
-                }
-                disabled={currentCodingIndex === CODING_QUESTIONS.length - 1}
-                className="px-4 py-2 bg-blue-500 text-white rounded-lg disabled:opacity-50"
-              >
-                Next
-              </button>
-            </div>
-          </div>
-        )}
-
-        <div className="mt-6 flex justify-center">
-          <button
-            onClick={() => handleExamEnd("Exam submitted by user")}
-            className="px-6 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg"
-          >
-            Submit Exam
-          </button>
-        </div>
-      </div>
-
-      <div className="fixed top-4 right-4 w-80 space-y-2">
-        {alerts.map((alert) => (
-          <div
-            key={alert.id}
-            className={`p-4 rounded-lg shadow-lg ${
-              alert.type === "error"
-                ? "bg-red-500 text-white"
-                : alert.type === "warning"
-                ? "bg-yellow-100 text-yellow-800"
-                : "bg-green-100 text-green-800"
-            }`}
-          >
-            {alert.message}
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-};
-
-export default Exam;
+        );
+      };
+  
+      export default Exam;

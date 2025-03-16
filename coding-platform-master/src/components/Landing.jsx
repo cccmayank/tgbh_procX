@@ -60,6 +60,7 @@ const Landing = () => {
                 className="text-zinc-600 hover:text-zinc-900" 
                 href="#"
               >
+                
                 Pricing
               </motion.a>
               <motion.a 
@@ -97,7 +98,7 @@ const Landing = () => {
                   transition={{ duration: 0.5, delay: 0.6 }}
                   className="bg-zinc-100 text-zinc-800 text-xs font-medium tracking-wider px-3 py-1 rounded-full w-fit mb-6"
                 >
-                  FULL-STACK TESTING PLATFORM
+                  FULL-STACK PROCTORING PLATFORM
                 </motion.span>
 
                 <motion.h1 
@@ -117,7 +118,7 @@ const Landing = () => {
                   transition={{ duration: 0.8, delay: 1 }}
                   className="text-lg text-zinc-600 mb-8 max-w-lg"
                 >
-                  The ultimate platform for full-stack coding assessments. Test your
+                  The ultimate platform for online assessments. Test your
                   skills, track your progress, and land your dream job with our modern proctoring solution.
                 </motion.p>
 

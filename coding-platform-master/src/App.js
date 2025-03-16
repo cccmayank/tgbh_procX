@@ -66,11 +66,11 @@ function App() {
       ],
     },
     {
-      path: "/test",
+      path: "/test/*",
       element: <Test />,
     },
     {
-      path: "/exam",
+      path: "/exam/*",
       element: <Exam />,
     },
     {

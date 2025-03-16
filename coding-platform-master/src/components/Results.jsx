@@ -3,6 +3,8 @@ import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import { motion } from 'framer-motion';
 import { User, Mail, Calendar, Send, Settings, ChevronDown, ArrowLeft, Printer, RefreshCw, Trash2, ChevronRight } from 'lucide-react';
 
+
+
 // Separate component for displaying optimal solutions
 const OptimalSolutionDisplay = ({ question, submittedCode, language }) => {
   return (
