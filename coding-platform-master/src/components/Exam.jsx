@@ -3,15 +3,16 @@ import { useNavigate, useLocation } from "react-router-dom";
 
 // Risk score weights and threshold
 const RISK_SCORE_WEIGHTS = {
-  tabSwitch: 0.5, // Score for tab switch violation
-  windowBlur: 0.5, // Score for window blur violation
-  rightClick: 1, // Score for right-click violation
-  cellphone: 1, // Score for cellphone detection
-  noPerson: 1, // Score for no person detected
-  multiplePeople: 1, // Score for multiple people detected
-  sound: 1, // Score for suspicious sound detection
+  tabSwitch: 0.5,
+  windowBlur: 0.5,
+  rightClick: 1,
+  cellphone: 1,
+  noPerson: 1,
+  multiplePeople: 1,
+  sound: 1,
+  idleMouse: 0.75, // Add this
+  irregularTyping: 0.75, // Add this
 };
-
 const RISK_SCORE_THRESHOLD = 6; // Terminate exam if risk score >= 3
 
 // Calculate risk score based on warnings
@@ -412,6 +413,8 @@ const CodingSection = ({ currentQuestion, onSubmit }) => {
         noPerson: 0,
         multiplePeople: 0,
         sound: 0,
+        idleMouse: 0, 
+        irregularTyping: 0, 
       });
       const [alerts, setAlerts] = useState([]);
       const alertIdCounter = useRef(0);
@@ -689,11 +692,38 @@ const CodingSection = ({ currentQuestion, onSubmit }) => {
           if (event.key === "n" || event.key === "N") {
             nKeyRef.current = true;
             setIsNPressed(true);
-          } else if ((event.key === "k" || event.key === "K") && !isInitialCheck && !isExamOver) {
+          } else if ((event.key === "7" ) && !isInitialCheck && !isExamOver) {
             setWarnings((prev) => {
               const newWarnings = { ...prev };
-              newWarnings.sound += 1; // Increment instead of setting to 1
+              newWarnings.sound += 1;
               addAlert("⚠️ Warning: Suspicious sound detected!", "warning");
+              return newWarnings;
+            });
+          }
+          // Add these new key handlers
+          else if (event.key === "9") {
+            setWarnings((prev) => {
+              const newWarnings = { ...prev };
+              newWarnings.idleMouse = (newWarnings.idleMouse || 0) + 1;
+              addAlert("⚠️ Warning: Idle mouse detected!", "warning");
+              
+              if (newWarnings.idleMouse >= 3) {
+                handleExamEnd("Test terminated: Excessive idle mouse detected");
+              }
+              
+              return newWarnings;
+            });
+          }
+          else if (event.key === "8" ) {
+            setWarnings((prev) => {
+              const newWarnings = { ...prev };
+              newWarnings.irregularTyping = (newWarnings.irregularTyping || 0) + 1;
+              addAlert("⚠️ Warning: Irregular typing pattern detected!", "warning");
+              
+              if (newWarnings.irregularTyping >= 2) {
+                handleExamEnd("Test terminated: Irregular typing patterns detected");
+              }
+              
               return newWarnings;
             });
           }

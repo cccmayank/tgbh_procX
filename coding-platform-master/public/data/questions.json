@@ -2,60 +2,30 @@
     {
         "question": "What is 5 + 3?",
         "answers": {
-            "a": "6",
-            "b": "7",
-            "c": "8",
-            "d": "9"
+            "a": "7",
+            "b": "8",
+            "c": "9",
+            "d": "10"
         },
         "correct_answers": {
             "a_correct": "false",
-            "b_correct": "false",
-            "c_correct": "true",
-            "d_correct": "false"
-        }
-    },
-    {
-        "question": "What is the optimal buffer size for minimizing latency in a real-time audio processing pipeline utilizing a multi-threaded, low-level operating system, considering the trade-off between CPU load, interrupt handling overhead, and the potential for buffer underruns, assuming a sample rate of 44.1kHz and a desired audio fidelity of 16 bits?",
-        "answers": {
-            "a": "64 samples",
-            "b": "256 samples",
-            "c": "1024 samples",
-            "d": "512 samples"
-        },
-        "correct_answers": {
-            "a_correct": "false",
-            "b_correct": "false",
+            "b_correct": "true",
             "c_correct": "false",
             "d_correct": "false"
         }
     },
     {
-        "question": "What comes after 12?",
+        "question": "In the context of post-structuralist literary criticism, what is the role of diff\u00e9rance in deconstructing the binary oppositions present in a text?",
         "answers": {
-            "a": "10",
-            "b": "11",
-            "c": "13",
-            "d": "14"
+            "a": "To solidify the inherent hierarchical structure established by the dominant term in the binary.",
+            "b": "To reveal the inherent stability and fixed meanings of each term within the binary.",
+            "c": "To highlight the ways in which each term in the binary is defined by what it is not, thus destabilizing any inherent meaning.",
+            "d": "To reinforce the transparent and direct relationship between language and reality, eliminating ambiguity."
         },
         "correct_answers": {
             "a_correct": "false",
             "b_correct": "false",
-            "c_correct": "true",
-            "d_correct": "false"
-        }
-    },
-    {
-        "question": "Which shape has 3 sides?",
-        "answers": {
-            "a": "Square",
-            "b": "Circle",
-            "c": "Triangle",
-            "d": "Rectangle"
-        },
-        "correct_answers": {
-            "a_correct": "false",
-            "b_correct": "false",
-            "c_correct": "true",
+            "c_correct": "false",
             "d_correct": "false"
         }
     },
@@ -75,37 +45,37 @@
         }
     },
     {
-        "question": "What is 2 x 2?",
+        "question": "Which shape has 3 sides?",
         "answers": {
-            "a": "3",
-            "b": "4",
-            "c": "5",
-            "d": "6"
+            "a": "Square",
+            "b": "Circle",
+            "c": "Triangle",
+            "d": "Rectangle"
         },
         "correct_answers": {
             "a_correct": "false",
-            "b_correct": "true",
-            "c_correct": "false",
+            "b_correct": "false",
+            "c_correct": "true",
             "d_correct": "false"
         }
     },
     {
-        "question": "Which number is bigger: 7 or 5?",
+        "question": "What number comes after 12?",
         "answers": {
-            "a": "5",
-            "b": "7",
-            "c": "They are the same",
-            "d": "None"
+            "a": "10",
+            "b": "11",
+            "c": "13",
+            "d": "14"
         },
         "correct_answers": {
             "a_correct": "false",
-            "b_correct": "true",
-            "c_correct": "false",
+            "b_correct": "false",
+            "c_correct": "true",
             "d_correct": "false"
         }
     },
     {
-        "question": "What is 8 - 2?",
+        "question": "What is 2 + 2 + 2?",
         "answers": {
             "a": "4",
             "b": "5",
@@ -120,12 +90,42 @@
         }
     },
     {
-        "question": "Count the ducks: \ud83e\udd86\ud83e\udd86\ud83e\udd86. How many are there?",
+        "question": "Which is bigger, 15 or 10?",
         "answers": {
-            "a": "One",
-            "b": "Two",
-            "c": "Three",
-            "d": "Four"
+            "a": "10",
+            "b": "15",
+            "c": "They are the same",
+            "d": "None of the above"
+        },
+        "correct_answers": {
+            "a_correct": "false",
+            "b_correct": "true",
+            "c_correct": "false",
+            "d_correct": "false"
+        }
+    },
+    {
+        "question": "If you have 4 apples and give away 2, how many apples do you have left?",
+        "answers": {
+            "a": "1",
+            "b": "2",
+            "c": "3",
+            "d": "4"
+        },
+        "correct_answers": {
+            "a_correct": "false",
+            "b_correct": "true",
+            "c_correct": "false",
+            "d_correct": "false"
+        }
+    },
+    {
+        "question": "What is 7 - 2?",
+        "answers": {
+            "a": "3",
+            "b": "4",
+            "c": "5",
+            "d": "6"
         },
         "correct_answers": {
             "a_correct": "false",
@@ -135,12 +135,12 @@
         }
     },
     {
-        "question": "What is 1 + 1?",
+        "question": "Count the dots:  . . . . . . .  How many dots are there?",
         "answers": {
-            "a": "0",
-            "b": "1",
-            "c": "2",
-            "d": "3"
+            "a": "5",
+            "b": "6",
+            "c": "7",
+            "d": "8"
         },
         "correct_answers": {
             "a_correct": "false",
